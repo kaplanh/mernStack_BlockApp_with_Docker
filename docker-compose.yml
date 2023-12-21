@@ -1,0 +1,39 @@
+version: "3.9" # opsiyonel.
+#asagidaki servislerimi ayaga kaldir 1-frontend 2 backend
+services:
+    client:
+    #container name vermezsem frontend i alir
+        container_name: client 
+        # hubdan alacagim hazir bir image olursa image:node gibi yazip build komutuna ihtiyac kalmaz ama yeni bir image yapacaksam build ve image ismini yazmam gerek
+        # not:degerler 'docker-compose-frontend' icindede yazilabilir
+        # ayni isimde image varsa build etmeyecektir
+        image: kplnhsyn/docker-compose-client
+        build: ./client
+        ports:
+        #birden fazla port tanimlayabilirim
+            # dış/iç port numaraları
+            - 5173:5173
+            - 3000:5173
+            - 80:5173
+        restart: on-failure # hata anında tekrar çalıştır.
+        depends_on:
+        # frontend projemin calisabilmesi icin önce backend calismasi lzim o nedenle
+            # önce aşağıdakileri çalıştır.
+            - server # aşağıda tanımlandı.
+    server:
+        container_name: server
+        image: kplnhsyn/docker-compose-server
+        build: ./server
+        ports:
+            - 8000:8000
+        restart: on-failure
+        volumes:
+            # fiziksel yollar (external:internal)
+            # container i acip yeni girdiler yapip kapadigimizda yenidenactigimizda bu girdiler silinir görünmez bunlar silinmesin diye asagidaki kodlarida eklemeliyiz
+            - $PWD/server/logs:/server/logs
+            - $PWD/server/upload:/server/upload
+# --------------------------------
+# $ docker compose up # compose çalıştır.
+# $ docker compose up -d --build # compose daemon aç ve tekrar build et.
+# $ docker compose down # compose kapat.
+# $ docker compose down -v # compose tümünü kapat.
